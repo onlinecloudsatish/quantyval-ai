@@ -1,0 +1,99 @@
+# Quantyval AI - Docker Compose
+# Local development and production orchestration
+
+services:
+  # Main Quantyval agent service
+  quantyval:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: quantyval-ai
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - QUANTYVAL_API_KEY=${QUANTYVAL_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-kilocode}
+      - LLM_MODEL=${LLM_MODEL:-kilo-auto/free}
+    volumes:
+      - ../data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - quantyval-net
+
+  # Redis for memory caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: quantyval-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - quantyval-net
+
+  # Optional: Telegram bridge
+  telegram-bridge:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: quantyval-telegram
+    command: node src/channels/TelegramBridge.js
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - QUANTYVAL_API_KEY=${QUANTYVAL_API_KEY:-}
+    ports:
+      - "3001:3000"
+    depends_on:
+      - quantyval
+    restart: unless-stopped
+    networks:
+      - quantyval-net
+
+  # Optional: Discord bridge
+  discord-bridge:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: quantyval-discord
+    command: node src/channels/DiscordBridge.js
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-}
+      - DISCORD_APP_ID=${DISCORD_APP_ID:-}
+      - QUANTYVAL_API_KEY=${QUANTYVAL_API_KEY:-}
+    ports:
+      - "3002:3000"
+    depends_on:
+      - quantyval
+    restart: unless-stopped
+    networks:
+      - quantyval-net
+
+  # Nginx reverse proxy (production)
+  nginx:
+    image: nginx:alpine
+    container_name: quantyval-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - quantyval
+    restart: unless-stopped
+    networks:
+      - quantyval-net
+
+volumes:
+  redis-data:
+
+networks:
+  quantyval-net:
+    driver: bridge
