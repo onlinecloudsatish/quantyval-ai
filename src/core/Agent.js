@@ -29,6 +29,9 @@ export class Agent {
     if (config.llm) {
       this.setLLM(config.llm);
     }
+    
+    // Initialize systemPrompt reference
+    this.systemPrompt = this.config.systemPrompt;
   }
 
   setLLM(providerConfig) {
