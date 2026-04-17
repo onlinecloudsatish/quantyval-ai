@@ -1,5 +1,6 @@
 // Quantyval AI - Core Agent
 // Universal agent with reasoning, tools, memory, LLM
+// Based on best patterns from CL4R1T4S analysis
 
 import { createProvider } from './LLMProvider.js';
 import { Memory } from '../memory/Memory.js';
@@ -11,7 +12,18 @@ export class Agent {
     this.llm = null;
     this.tools = config.tools || [];
     this.memory = config.memory || new Memory();
-    this.systemPrompt = config.systemPrompt || 'You are Quantyval AI, a helpful agent.';
+    
+    // Best patterns from CL4R1T4S
+    this.config = {
+      // Communication style
+      noOptInQuestions: config.noOptInQuestions ?? true,  // Don't ask, just do
+      explainBeforeTool: config.explainBeforeTool ?? true, // Explain why before tool
+      readBeforeEdit: config.readBeforeEdit ?? true,        // Read before editing
+      maxErrorLoops: config.maxErrorLoops ?? 3,             // Max 3 error attempts
+      
+      // Tone
+      systemPrompt: config.systemPrompt || 'You are Quantyval AI, a helpful agent. Be professional but friendly. Provide runnable code and examples without asking. Do the next obvious step automatically.',
+    };
     
     // Initialize LLM if provider specified
     if (config.llm) {
