@@ -2,11 +2,18 @@
   "name": "quantyval-ai",
   "version": "1.0.0",
   "description": "Universal AI Agent Framework - Task execution, voice, multi-agent orchestration",
-  "main": "src/index.js",
   "type": "module",
+  "bin": {
+    "quantyval": "./bin/cli.js"
+  },
+  "main": "src/index.js",
   "scripts": {
-    "start": "node src/server/SecureServer.js",
-    "dev": "node --watch src/server/SecureServer.js",
+    "start": "node bin/cli.js serve",
+    "run": "node bin/cli.js run",
+    "serve": "node bin/cli.js serve",
+    "init": "node bin/cli.js init",
+    "voice": "node bin/cli.js voice",
+    "dev": "node --watch bin/cli.js",
     "test": "node --test tests/*.test.js",
     "test:unit": "node --test tests/core.test.js",
     "test:security": "node --test tests/security.test.js",
