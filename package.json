@@ -14,9 +14,9 @@
     "agent": "node bin/quantyval.js agent",
     "status": "node bin/quantyval.js status",
     "providers": "node bin/quantyval.js providers",
-    "vyasa": "node bin/quantyval.js vyasa",
-    "dev": "node --watch bin/quantyval.js",
-    "test": "node --test tests/*.test.js"
+    "api": "node src/server/api.js",
+    "web": "node examples/web-chat.js",
+    "vyasa": "node bin/quantyval.js vyasa"
   },
   "keywords": [
     "ai",
