@@ -106,8 +106,9 @@ export class TelegramBot {
   // Start polling (for development)
   async startPolling(offset = 0) {
     logger.info('Telegram: Starting polling...');
+    this.polling = true;
     
-    while (true) {
+    while (this.polling) {
       try {
         const updates = await this.api('getUpdates', {
           offset,
@@ -119,10 +120,18 @@ export class TelegramBot {
           offset = update.update_id + 1;
         }
       } catch (err) {
+        if (!this.polling) break;
         logger.error(`Polling error: ${err.message}`);
         await new Promise(r => setTimeout(r, 5000));
       }
     }
+    logger.info('Telegram: Polling stopped');
+  }
+  
+  // Stop polling
+  stopPolling() {
+    this.polling = false;
+    logger.info('Telegram: Stopping polling...');
   }
   
   // Express middleware for webhook
