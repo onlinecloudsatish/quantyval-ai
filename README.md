@@ -2,129 +2,108 @@
 
 > Universal AI Agent Framework - Task execution, voice, multi-agent orchestration
 
+[![npm](https://img.shields.io/npm/v/quantyval-ai)](https://npmjs.com/package/quantyval-ai)
+[![GitHub](https://img.shields.io/github/license/onlinecloudsatish/quantyval-ai)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-37%20passing-green)](tests/)
+
 ## Features
 
-- **Core Agent** - ReAct-style reasoning + tool use
-- **LLM Integration** - OpenAI, Anthropic, OpenRouter, KiloCode
-- **Tool System** - Shell, browser, HTTP, APIs
-- **Memory** - Short-term + long-term with compression
-- **Channels** - Telegram, Discord, WebSocket, HTTP
-- **Voice** - TTS (ElevenLabs, OpenAI) + STT (Whisper)
-- **Server** - HTTP API for agent interactions
-- **Multi-Agent** - Orchestration (coming)
-- **Deployment** - Local, server, Docker
-
-## Install
-
-```bash
-npm install
-```
+| Category | Features |
+|----------|----------|
+| **Core** | Agent with ReAct reasoning, LLM providers (OpenAI, Anthropic, OpenRouter, KiloCode) |
+| **Security** | Command allowlists, SSRF protection, API auth, rate limiting |
+| **Memory** | Short-term + long-term, Redis adapter for persistence |
+| **Skills** | Auto-detect tech stack (React, Node, Python, Go, etc.) |
+| **CLI** | Full command-line (`run`, `serve`, `init`, `voice`) |
+| **Channels** | Telegram bot, WebSocket, HTTP |
+| **Tools** | Playwright browser automation |
+| **Multi-Agent** | Sequential, parallel, hierarchical orchestration |
+| **Voice** | TTS (ElevenLabs, OpenAI) + STT (Whisper) |
 
 ## Quick Start
 
 ### CLI
 
 ```bash
-npm start
-# Starts server on port 3000
+# Run agent
+npx quantyval run --model kilocode:kilo-auto/free
+
+# Start server
+npx quantyval serve --port 3000
+
+# Initialize project
+npx quantyval init
 ```
 
 ### Code
 
 ```javascript
-import { Agent, createProvider, startServer } from './src/index.js';
+import { Agent, createProvider } from 'quantyval-ai';
 
-// 1. Create LLM provider
-const llm = createProvider('kilocode', {
-  apiKey: process.env.QUANTYVAL_API_KEY,
-  model: 'kilo-auto/free',
-});
-
-// 2. Create agent
 const agent = new Agent({
-  name: 'MyAgent',
-  systemPrompt: 'You are a helpful AI assistant.',
-  llm,
+  name: 'MyBot',
+  systemPrompt: 'You are a helpful assistant.',
+  llm: { type: 'kilocode', apiKey: process.env.QUANTYVAL_API_KEY },
 });
 
-// 3. Run
-const response = await agent.run('Hello, what can you do?');
-console.log(response);
+const response = await agent.run('Hello!');
+console.log(response.text);
 ```
 
-### HTTP API
+### Telegram Bot
 
 ```bash
-# Health
-curl http://localhost:3000/health
+TELEGRAM_BOT_TOKEN=xxx node examples/telegram-bot/bot.js
+```
 
-# Run agent
-curl -X POST http://localhost:3000/api/run \
-  -H "Content-Type: application/json" \
-  -d '{"input": "Hello!"}'
+## Installation
 
-# Stream
-curl -X POST http://localhost:3000/api/stream \
-  -H "Content-Type: application/json" \
-  -d '{"input": "Tell me a story"}'
+```bash
+npm install quantyval-ai
 ```
 
 ## Configuration
 
-Edit `config/default.js`:
+| Option | Description | Default |
+|--------|-------------|---------|
+| `name` | Agent name | `Quantyval` |
+| `model` | LLM provider | `kilocode:kilo-auto/free` |
+| `memory` | Enable memory | `false` |
+| `port` | Server port | `3000` |
 
-```javascript
-export default {
-  name: 'Quantyval',
-  
-  model: {
-    provider: 'kilocode',
-    model: 'kilo-auto/free',
-    apiKey: process.env.QUANTYVAL_API_KEY,
-  },
+## CLI Options
 
-  server: {
-    port: 3000,
-    host: '0.0.0.0',
-  },
-
-  // Voice (optional)
-  voice: {
-    tts: { type: 'elevenlabs', apiKey: '...' },
-    stt: { type: 'whisper', apiKey: '...' },
-  },
-};
+```bash
+quantyval run --model openai:gpt-4        # Run interactive
+quantyval serve --port 8080               # Start HTTP server
+quantyval init                           # Create config
+quantyval voice                          # Voice mode
 ```
 
 ## Architecture
 
 ```
 quantyval-ai/
+├── bin/cli.js          # CLI entry point
 ├── src/
-│   ├── index.js          # Main exports
-│   ├── core/
-│   │   ├── Agent.js      # Core agent
-│   │   ├── ToolRunner.js # Tool system
-│   │   └── LLMProvider.js # OpenAI, Anthropic, etc
-│   ├── memory/
-│   │   └── Memory.js   # Short + long term
-│   ├── channels/
-│   │   └── Channel.js  # Telegram, Discord, WS
-│   ├── voice/
-│   │   └── Voice.js    # TTS + STT
-│   └── server/
-│       └── Server.js    # HTTP API
-├── config/
-│   └── default.js
-└── tests/
+│   ├── core/           # Agent, LLM providers
+│   ├── memory/         # Memory, Redis
+│   ├── channels/       # Telegram, Discord
+│   ├── tools/          # Browser automation
+│   ├── server/         # HTTP server
+│   ├── voice/          # TTS/STT
+│   ├── multiagent/     # Orchestration
+│   └── utils/          # Logger, errors, skills
+├── examples/          # Example projects
+└── tests/             # 37 tests
 ```
 
-## Tech
+## Best Practices
 
-- Node.js 18+
-- ES Modules
-- Minimal dependencies (node-fetch, ws)
-- Add Rust for hot paths later
+- Set `QUANTYVAL_API_KEY` environment variable
+- Use `.env` for configuration
+- Enable memory for conversations
+- Use skills for tech-specific prompts
 
 ## License
 
