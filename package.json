@@ -19,8 +19,16 @@
     "test:security": "node --test tests/security.test.js",
     "test:integration": "node --test tests/integration.test.js"
   },
-  "keywords": ["ai", "agent", "llm", "multi-agent", "voice-agent"],
+  "keywords": [
+    "ai",
+    "agent",
+    "llm",
+    "multi-agent",
+    "voice-agent"
+  ],
   "author": "",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }
