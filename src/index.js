@@ -28,6 +28,16 @@ export * as SecureLLM from './core/SecureLLMProvider.js';
 // Server (secure version)
 export { SecureServer, startSecureServer } from './server/SecureServer.js';
 
+// New advanced features
+export { WorkerPool, TaskQueue, createWorkerPool } from './multiagent/WorkerPool.js';
+export { Workflow, createWorkflow, EXAMPLE_WORKFLOWS } from './workflow/Workflow.js';
+export { WebhookManager, WebhookServer, createWebhookManager } from './webhooks/Webhooks.js';
+export { FileWatcher, createFileWatcher, PRESET_WATCHERS } from './automation/FileWatcher.js';
+export { CronManager, CronJob, createCronManager, SCHEDULES } from './automation/Cron.js';
+export { Database, createDatabase, createSessionStore, createConversationStore } from './database/Database.js';
+export { ToolRegistry, createToolRegistry, BUILTIN_TOOLS } from './tools/ToolRegistry.js';
+export { Metrics, createMetrics, metricsMiddleware, trackAPI } from './monitoring/Metrics.js';
+
 // Also export non-secure Server for compatibility
 export { Server, startServer } from './server/Server.js';
 

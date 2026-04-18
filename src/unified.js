@@ -177,6 +177,43 @@ Your goal is to help the user accomplish their tasks effectively.`;
     throw lastError || new Error('All providers failed');
   }
   
+  // Stream completion (real-time tokens)
+  async *stream(input, options = {}) {
+    const providers = this.routing.enabled 
+      ? this.getProviderList() 
+      : [{ type: this.providerType, model: this.model }];
+    
+    for (const provider of providers) {
+      try {
+        if (!this.llm || this.providerType !== provider.type) {
+          this.llm = createProvider(provider.type, {
+            apiKey: options.apiKey || this.config.apiKey,
+            model: provider.model,
+          });
+          this.providerType = provider.type;
+        }
+        
+        const messages = [
+          { role: 'system', content: this.systemPrompt },
+          { role: 'user', content: input },
+        ];
+        
+        for await (const chunk of this.llm.stream(messages, options)) {
+          yield chunk;
+        }
+        
+        logger.info(`Stream completed with: ${provider.type}`);
+        return;
+        
+      } catch (e) {
+        logger.warn(`Stream provider ${provider.type} failed: ${e.message}`);
+        continue;
+      }
+    }
+    
+    throw new Error('All streaming providers failed');
+  }
+  
   // Get all providers in routing order
   getProviderList() {
     const providers = [];
