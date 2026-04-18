@@ -1,7 +1,7 @@
 // Quantyval AI - Skill System
 // Based on autoskills/skills.sh concept
 
-import { logger } from './utils/logger.js';
+import { logger } from './logger.js';
 
 export class Skill {
   constructor(config = {}) {

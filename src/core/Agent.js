@@ -4,6 +4,7 @@
 
 import { createProvider } from './LLMProvider.js';
 import { Memory } from '../memory/Memory.js';
+import { SkillManager } from '../utils/skills.js';
 
 export class Agent {
   constructor(config = {}) {
@@ -12,6 +13,7 @@ export class Agent {
     this.llm = null;
     this.tools = config.tools || [];
     this.memory = config.memory || new Memory();
+    this.skillManager = new SkillManager();
     
     // Best patterns from CL4R1T4S
     this.config = {
@@ -21,9 +23,26 @@ export class Agent {
       readBeforeEdit: config.readBeforeEdit ?? true,        // Read before editing
       maxErrorLoops: config.maxErrorLoops ?? 3,             // Max 3 error attempts
       
+      // Auto-skill detection
+      autoDetectSkills: config.autoDetectSkills ?? true,  // Auto-detect from package.json
+      
       // Tone
       systemPrompt: config.systemPrompt || 'You are Quantyval AI, a helpful agent. Be professional but friendly. Provide runnable code and examples without asking. Do the next obvious step automatically.',
     };
+    
+    // Auto-detect skills from package.json if enabled
+    if (this.config.autoDetectSkills && config.packageJson) {
+      const detectedSkills = this.skillManager.detect(config.packageJson);
+      for (const skill of detectedSkills) {
+        this.skillManager.enable(skill.name);
+      }
+    }
+    
+    // Append skill prompts to system prompt
+    const skillPrompts = this.skillManager.getPrompts();
+    if (skillPrompts.length) {
+      this.config.systemPrompt += '\n\n' + skillPrompts.join('\n\n');
+    }
     
     // Initialize LLM if provider specified
     if (config.llm) {
