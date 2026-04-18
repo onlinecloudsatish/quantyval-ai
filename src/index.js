@@ -6,6 +6,9 @@ export { Agent, ReActAgent } from './core/Agent.js';
 export { ToolRunner } from './core/ToolRunner.js';
 export * as LLM from './core/LLMProvider.js';
 
+// Unified (all-in-one with vyasa + 9Router-style routing)
+export { UnifiedAgent, createUnifiedAgent, quickStart, runCLI } from './unified.js';
+
 // Memory
 export { Memory } from './memory/Memory.js';
 
