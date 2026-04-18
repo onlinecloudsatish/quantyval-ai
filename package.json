@@ -1,23 +1,22 @@
 {
   "name": "quantyval-ai",
   "version": "1.0.0",
-  "description": "Universal AI Agent Framework - Task execution, voice, multi-agent orchestration",
+  "description": "Quantyval AI + vyasa-u-code Unified Framework - Smart LLM routing with 12 providers",
   "type": "module",
   "bin": {
-    "quantyval": "./bin/cli.js"
+    "quantyval": "./bin/quantyval.js"
   },
   "main": "src/index.js",
   "scripts": {
-    "start": "node bin/cli.js serve",
-    "run": "node bin/cli.js run",
-    "serve": "node bin/cli.js serve",
-    "init": "node bin/cli.js init",
-    "voice": "node bin/cli.js voice",
-    "dev": "node --watch bin/cli.js",
-    "test": "node --test tests/*.test.js",
-    "test:unit": "node --test tests/core.test.js",
-    "test:security": "node --test tests/security.test.js",
-    "test:integration": "node --test tests/integration.test.js"
+    "start": "node bin/quantyval.js run",
+    "run": "node bin/quantyval.js run",
+    "chat": "node bin/quantyval.js run",
+    "agent": "node bin/quantyval.js agent",
+    "status": "node bin/quantyval.js status",
+    "providers": "node bin/quantyval.js providers",
+    "vyasa": "node bin/quantyval.js vyasa",
+    "dev": "node --watch bin/quantyval.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [
     "ai",
