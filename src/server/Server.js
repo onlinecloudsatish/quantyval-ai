@@ -48,7 +48,9 @@ export class Server {
           body += chunk;
         }
         
-        const { input, context } = JSON.parse(body || '{}');
+        let parsed = {};
+        try { parsed = JSON.parse(body || '{}'); } catch {}
+        const { input, context } = parsed;
         const response = await this.agent.run(input, context);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
