@@ -76,7 +76,7 @@ export class WebhookManager {
       throw new Error(`HTTP ${res.status}`);
     }
     
-    return res.json().catch(() => ());
+    return res.json().catch(() => ({}));
   }
   
   // Get webhook status
