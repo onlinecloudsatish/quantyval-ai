@@ -12,19 +12,22 @@
     "run": "node bin/quantyval.js run",
     "chat": "node bin/quantyval.js run",
     "agent": "node bin/quantyval.js agent",
+    "task": "node bin/quantyval.js agent",
     "status": "node bin/quantyval.js status",
     "providers": "node bin/quantyval.js providers",
+    "model": "node bin/quantyval.js model",
+    "help": "node bin/quantyval.js help",
     "api": "node src/server/api.js",
+    "serve": "node src/server/api.js",
+    "server": "node src/server/api.js",
     "web": "node examples/web-chat.js",
-    "vyasa": "node bin/quantyval.js vyasa"
+    "ui": "node examples/web-chat.js",
+    "vyasa": "node bin/quantyval.js vyasa",
+    "test": "node --test tests/core.test.js",
+    "test:all": "node --test tests/*.test.js",
+    "example": "node examples/basic/bot.js"
   },
-  "keywords": [
-    "ai",
-    "agent",
-    "llm",
-    "multi-agent",
-    "voice-agent"
-  ],
+  "keywords": ["ai", "agent", "llm", "multi-agent", "voice-agent"],
   "author": "",
   "license": "MIT",
   "dependencies": {
