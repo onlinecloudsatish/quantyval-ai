@@ -1,6 +1,6 @@
 {
   "name": "@quantyval-ai/quantyval-ai",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Quantyval AI + vyasa-u-code Unified Framework - Smart LLM routing with 12 providers",
   "type": "module",
   "bin": {
