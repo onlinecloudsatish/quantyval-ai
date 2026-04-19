@@ -11,8 +11,8 @@ export default {
     // model: 'anthropic/claude-3.5-sonnet',
     
     // Or override with environment
-    provider: process.env.LLM_PROVIDER || 'openrouter',
-    model: process.env.LLM_MODEL || 'anthropic/claude-3.5-sonnet',
+    provider: process.env.LLM_PROVIDER || 'kilocode',
+    model: process.env.LLM_MODEL || 'kilo-auto/free',
     apiKey: process.env.QUANTYVAL_API_KEY || process.env.OPENROUTER_API_KEY || '',
     baseUrl: process.env.LLM_BASE_URL || '',
   },
