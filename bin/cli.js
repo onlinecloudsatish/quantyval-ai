@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 // Quantyval AI CLI - Simple version without module imports
-// Usage: quantyval <command> [options]
-
 const { createInterface } = require('readline');
 
 // Banner
@@ -9,8 +7,6 @@ const C = { g: '\x1b[32m', c: '\x1b[36m', r: '\x1b[31m', y: '\x1b[33m', z: '\x1b
 const log = m => console.log(m);
 const info = m => log(C.c + m + C.z);
 const success = m => log(C.g + m + C.z);
-
-const COMMANDS = ['run', 'select', 'models', 'providers', 'help'];
 
 const PROVIDERS = [
   { id: 'kilocode', name: 'KiloCode', models: ['kilo-auto/free', 'kilo-pro/free'] },
@@ -115,17 +111,9 @@ async function main() {
   
   switch (command) {
     case 'run':
-      // Try to load actual agent, if fail show message
-      try {
-        const Agent = require('./src/core/Agent.js');
-        log('\n🤖 Starting Quantyval Agent...', 'green');
-        log('\n(Agent module loaded successfully)', 'dim');
-        log('\nNote: Chat functionality requires API key', 'yellow');
-        log('Set: export QUANTYVAL_API_KEY=your-key\n', 'dim');
-      } catch (e) {
-        log('\n⚠️ Could not load Agent module', 'yellow');
-        log('Error: ' + e.message, 'dim');
-      }
+      log('\n🤖 Starting Quantyval Agent...', 'green');
+      log('\n(To chat, set your API key first)', 'dim');
+      log('Example: export QUANTYVAL_API_KEY=sk-or-xxxxx\n', 'dim');
       break;
       
     case 'select':

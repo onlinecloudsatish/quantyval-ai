@@ -3,7 +3,7 @@
  * Quantyval CLI Entry Point
  */
 
-const C = { g: '\x1b[32m', c: '\x1b[36m', r: '\x1b[31m', y: '\x1b[33m', z: '\x1b[0m', bold: '\x1b[1m' };
+const C = { g: '\x1b[32m', c: '\x1b[36m', r: '\x1b[31m', y: '\x1b[33m', z: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m' };
 const log = m => console.log(m);
 const header = m => log(C.bold + m + C.z);
 
@@ -15,11 +15,13 @@ header('╚═══════════════════════
 const args = process.argv.slice(2);
 const command = args[0];
 
-// Use spawn to delegate to cli.js
 const { spawn } = require('child_process');
 const path = require('path');
-const binDir = path.dirname(require.resolve('./package.json'));
-const cliPath = path.join(binDir, 'cli.js');
+
+// Get the package directory (parent of bin)
+const binDir = __dirname;
+const pkgDir = path.dirname(binDir);
+const cliPath = path.join(pkgDir, 'bin', 'cli.js');
 
 switch (command) {
   case 'run':
@@ -35,7 +37,6 @@ switch (command) {
     break;
     
   default:
-    // Show help
     log('Usage: quantyval <command> [options]', 'dim');
     log('\nCommands:', 'bright');
     log('  run           Start interactive chat', 'dim');
