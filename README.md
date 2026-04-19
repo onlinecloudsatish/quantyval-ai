@@ -2,8 +2,8 @@
 
 > Universal AI Agent Framework - Task execution, voice, multi-agent orchestration
 
-[![npm](https://img.shields.io/npm/v/quantyval-ai)](https://npmjs.com/package/quantyval-ai)
-[![GitHub](https://img.shields.io/github/license/onlinecloudsatish/quantyval-ai)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@@quantyval-ai/quantyval-ai/@quantyval-ai/quantyval-ai)](https://npmjs.com/package/@@quantyval-ai/quantyval-ai/@quantyval-ai/quantyval-ai)
+[![GitHub](https://img.shields.io/github/license/onlinecloudsatish/@quantyval-ai/quantyval-ai)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-37%20passing-green)](tests/)
 
 ## Features
@@ -38,7 +38,7 @@ npx quantyval init
 ### Code
 
 ```javascript
-import { Agent, createProvider } from 'quantyval-ai';
+import { Agent, createProvider } from '@quantyval-ai/quantyval-ai';
 
 const agent = new Agent({
   name: 'MyBot',
@@ -59,7 +59,7 @@ TELEGRAM_BOT_TOKEN=xxx node examples/telegram-bot/bot.js
 ## Installation
 
 ```bash
-npm install quantyval-ai
+npm install @quantyval-ai/quantyval-ai
 ```
 
 ## Configuration
@@ -83,7 +83,7 @@ quantyval voice                          # Voice mode
 ## Architecture
 
 ```
-quantyval-ai/
+@quantyval-ai/quantyval-ai/
 ├── bin/cli.js          # CLI entry point
 ├── src/
 │   ├── core/           # Agent, LLM providers
