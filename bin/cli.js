@@ -15,8 +15,36 @@ const COMMANDS = {
   init: 'Initialize new agent config',
   chat: 'Start chat mode',
   voice: 'Start voice mode',
+  models: 'List available models',
   help: 'Show this help',
 };
+
+// Available models from config
+const PROVIDERS = [
+  { id: 'kilocode', name: 'KiloCode', models: ['kilo-auto/free', 'kilo-pro/free'] },
+  { id: 'openrouter', name: 'OpenRouter', models: ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o', 'meta-llama/llama-3.1-70b'] },
+  { id: 'openai', name: 'OpenAI', models: ['gpt-4o', 'gpt-4-turbo', 'o1-preview'] },
+  { id: 'anthropic', name: 'Anthropic', models: ['claude-sonnet-4', 'claude-opus-4', 'claude-haiku-4'] },
+  { id: 'groq', name: 'Groq', models: ['llama-3.1-70b-versatile', 'mixtral-8x7b-32768'] },
+  { id: 'ollama', name: 'Ollama (local)', models: ['llama3', 'mistral', 'codellama'] },
+  { id: 'gemini', name: 'Google Gemini', models: ['gemini-2.0-flash', 'gemini-pro'] },
+  { id: 'mistral', name: 'Mistral', models: ['mistral-large', 'mistral-small'] },
+  { id: 'nvidia', name: 'NVIDIA', models: ['nvidia/llama-3.1-nemotron-70b'] },
+  { id: 'cohere', name: 'Cohere', models: ['command-r-plus', 'command-r'] },
+];
+
+async function listModels() {
+  log('\n📋 Available Models', 'green');
+  log('='.repeat(35), 'dim');
+  for (const p of PROVIDERS) {
+    log(`\n${p.name} (${p.id}):`, 'blue');
+    for (const m of p.models) {
+      log(`  • ${p.id}:${m}`, 'dim');
+    }
+  }
+  log('\nUsage: --model provider:model', 'green');
+  log('Example: quantyval run --model openrouter:anthropic/claude-3.5-sonnet\n', 'dim');
+}
 
 const OPTIONS = {
   help: { type: 'boolean' },
@@ -203,6 +231,9 @@ async function main() {
       case 'chat':
         options.mode = 'chat';
         await runAgent(options);
+        break;
+      case 'models':
+        await listModels();
         break;
       default:
         error(`Unknown command: ${command}`);
