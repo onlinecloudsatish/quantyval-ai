@@ -3,11 +3,17 @@
 // Usage: quantyval <command> [options]
 
 import { parseArgs } from 'util';
-import { Agent } from './src/core/Agent.js';
-import { startServer, SecureServer } from './src/server/SecureServer.js';
-import { createProvider } from './src/core/LLMProvider.js';
-import { Memory } from './src/memory/Memory.js';
-import { createVoiceProvider } from './src/voice/Voice.js';
+import { path } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const srcDir = path.resolve(__dirname, 'src');
+
+const { Agent } = await import(path.join(srcDir, 'core/Agent.js'));
+const { startServer, SecureServer } = await import(path.join(srcDir, 'server/SecureServer.js'));
+const { createProvider } = await import(path.join(srcDir, 'core/LLMProvider.js'));
+const { Memory } = await import(path.join(srcDir, 'memory/Memory.js'));
+const { createVoiceProvider } = await import(path.join(srcDir, 'voice/Voice.js'));
 
 const COMMANDS = {
   run: 'Run agent interactively',
