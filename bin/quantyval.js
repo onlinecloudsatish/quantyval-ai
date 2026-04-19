@@ -132,9 +132,9 @@ async function main() {
     case 'select':
     case 'models':
       // Delegate to cli.js for interactive selection
-      const { spawn } = await import('child_process');
+      const { spawn: cliSpawn } = await import('child_process');
       const cliPath = require.resolve('quantyval-ai/bin/cli.js');
-      const cli = spawn('node', [cliPath, command], { 
+      const cli = cliSpawn('node', [cliPath, command], { 
         cwd: process.cwd(),
         stdio: 'inherit' 
       });
@@ -149,8 +149,8 @@ async function main() {
       await setModel(args.slice(1));
       break;
       
-    // Direct provider commands (e.g., quantyval openrouter, quantyval kilocode)
     default:
+      // Direct provider commands (e.g., quantyval openrouter, quantyval kilocode)
       if (['openrouter', 'kilocode', 'openai', 'anthropic', 'groq', 'gemini', 'mistral', 'ollama', 'nvidia', 'cohere', '9router'].includes(command)) {
         const readline = await import('readline');
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -164,8 +164,8 @@ async function main() {
         }
         
         // Start chat with this provider
-        const { spawn } = await import('child_process');
-        const child = spawn('node', ['bin/cli.js', 'run', `--provider=${command}`], { 
+        const { spawn: runSpawn } = await import('child_process');
+        const child = runSpawn('node', ['bin/cli.js', 'run', `--provider=${command}`], { 
           cwd: '/root/.openclaw/workspace/quantyval-ai',
           stdio: 'inherit' 
         });
@@ -174,10 +174,6 @@ async function main() {
         showHelp();
       }
       break;
-      
-    case 'help':
-    default:
-      showHelp();
   }
 }
 
