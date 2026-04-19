@@ -47,6 +47,7 @@ const PROVIDERS = [
   { id: 'mistral', name: 'Mistral', models: ['mistral-large-latest', 'mistral-small-3.1'] },
   { id: 'nvidia', name: 'NVIDIA', models: ['nvidia/llama-3.1-nemotron-70b-instruct'] },
   { id: 'cohere', name: 'Cohere', models: ['command-r-plus', 'command-r'] },
+  { id: '9router', name: '9Router', models: ['if/kimi-k2-thinking', 'deepseek/deepseek-chat'] },
 ];
 
 async function listModels() {
