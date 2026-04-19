@@ -111,9 +111,34 @@ async function main() {
   
   switch (command) {
     case 'run':
-      log('\n🤖 Starting Quantyval Agent...', 'green');
-      log('\n(To chat, set your API key first)', 'dim');
-      log('Example: export QUANTYVAL_API_KEY=sk-or-xxxxx\n', 'dim');
+      const model = args.find(a => a.startsWith('--model='))?.split('=')[1] || args[1] || 'kilocode:kilo-auto/free';
+      const [provider, modelName] = model.split(':');
+      
+      const apiKey = process.env.QUANTYVAL_API_KEY || process.env.OPENROUTER_API_KEY;
+      
+      if (!apiKey) {
+        log('\n⚠️  API key not set!', 'red');
+        log('Set: export QUANTYVAL_API_KEY=your-key\n', 'dim');
+        log('Or get a free key at: https://openrouter.ai/settings/keys\n', 'dim');
+        break;
+      }
+      
+      log('\n🤖 Starting chat with ' + provider + ':' + modelName, 'green');
+      log('Type "exit" to quit\n', 'dim');
+      
+      const rl = createInterface({ input: process.stdin, output: process.stdout });
+      
+      log('\nYou: ');
+      for await (const line of rl) {
+        if (line.trim().toLowerCase() === 'exit') break;
+        
+        // Simple echo for now - actual LLM integration needs Agent.js working
+        log('\n[Demo] You said: ' + line, 'dim');
+        log('\nYou: ');
+      }
+      
+      rl.close();
+      log('\nGoodbye!\n', 'green');
       break;
       
     case 'select':
