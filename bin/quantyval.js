@@ -24,6 +24,76 @@ const C = {
   z: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m' 
 };
 
+// Simple encryption for API keys (XOR with key)
+const ENC_KEY = 'quantyval-secret-key-2026';
+function encrypt(text) {
+  if (!text) return '';
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    result += String.fromCharCode(text.charCodeAt(i) ^ ENC_KEY.charCodeAt(i % ENC_KEY.length));
+  }
+  return Buffer.from(result, 'binary').toString('base64');
+}
+
+function decrypt(encoded) {
+  if (!encoded) return '';
+  const raw = Buffer.from(encoded, 'base64').toString('binary');
+  let result = '';
+  for (let i = 0; i < raw.length; i++) {
+    result += String.fromCharCode(raw.charCodeAt(i) ^ ENC_KEY.charCodeAt(i % ENC_KEY.length));
+  }
+  return result;
+}
+
+// Save encrypted API key
+function saveApiKey(provider, key) {
+  const envPath = path.join(process.cwd(), '.env');
+  let env = {};
+  
+  // Read existing .env
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      content.split('\n').forEach(line => {
+        const [k, ...v] = line.split('=');
+        if (k && v) env[k.trim()] = v.join('=').trim();
+      });
+    }
+  } catch (e) {}
+  
+  // Save encrypted key
+  const keyName = `${provider.toUpperCase()}_API_KEY`;
+  env[keyName] = encrypt(key);
+  
+  // Write back
+  const fs = require('fs');
+  const lines = Object.entries(env).map(([k, v]) => `${k}=${v}`).join('\n');
+  fs.writeFileSync(envPath, lines + '\n');
+  
+  process.env[keyName] = key; // Set in memory
+  success(`✅ API key saved and encrypted for ${provider}`);
+}
+
+function getApiKey(provider) {
+  const envPath = path.join(process.cwd(), '.env');
+  try {
+    const fs = require('fs');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const lines = content.split('\n');
+      const keyName = `${provider.toUpperCase()}_API_KEY`;
+      for (const line of lines) {
+        if (line.startsWith(keyName + '=')) {
+          const [, enc] = line.split('=');
+          return decrypt(enc.trim());
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 const log = m => console.log(m);
 const info = m => log(C.c + m + C.z);
 const success = m => log(C.g + m + C.z);
@@ -76,6 +146,32 @@ async function main() {
       
     case 'model':
       await setModel(args.slice(1));
+      break;
+      
+    // Direct provider commands (e.g., quantyval openrouter, quantyval kilocode)
+    default:
+      if (['openrouter', 'kilocode', 'openai', 'anthropic', 'groq', 'gemini', 'mistral', 'ollama', 'nvidia', 'cohere', '9router'].includes(command)) {
+        const readline = await import('readline');
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        
+        info(`\n🔑 Enter API key for ${command} (or press Enter to skip): `);
+        const key = await new Promise(resolve => rl.question('', resolve));
+        rl.close();
+        
+        if (key.trim()) {
+          saveApiKey(command, key.trim());
+        }
+        
+        // Start chat with this provider
+        const { spawn } = await import('child_process');
+        const child = spawn('node', ['bin/cli.js', 'run', `--provider=${command}`], { 
+          cwd: '/root/.openclaw/workspace/quantyval-ai',
+          stdio: 'inherit' 
+        });
+        child.on('exit', (code) => process.exit(code || 0));
+      } else {
+        showHelp();
+      }
       break;
       
     case 'help':
