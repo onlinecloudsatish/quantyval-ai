@@ -1,11 +1,19 @@
 {
   "name": "@quantyval-ai/quantyval-ai",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Quantyval AI + vyasa-u-code Unified Framework - Smart LLM routing with 12 providers",
   "type": "module",
   "bin": {
-    "quantyval": "bin/quantyval.js"
+    "quantyval": "bin/quantyval.js",
+    "quantyval-cli": "bin/cli.js"
   },
+  "files": [
+    "bin",
+    "src",
+    "config",
+    "examples",
+    "node_modules"
+  ],
   "main": "src/index.js",
   "scripts": {
     "start": "node bin/quantyval.js run",
