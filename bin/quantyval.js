@@ -28,7 +28,7 @@ switch (command) {
   case 'select':
   case 'models':
   case 'providers':
-    const child = spawn('node', [cliPath, command], {
+    const child = spawn('node', [cliPath, command, ...args.slice(1)], {
       cwd: process.cwd(),
       stdio: 'inherit',
       shell: false
