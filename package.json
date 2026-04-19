@@ -1,6 +1,6 @@
 {
   "name": "@quantyval-ai/quantyval-ai",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Quantyval AI + vyasa-u-code Unified Framework - Smart LLM routing with 12 providers",
   "type": "module",
   "bin": {
@@ -38,5 +38,8 @@
   "license": "MIT",
   "dependencies": {
     "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
