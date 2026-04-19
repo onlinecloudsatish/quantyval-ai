@@ -1,10 +1,10 @@
 {
   "name": "@quantyval-ai/quantyval-ai",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Quantyval AI + vyasa-u-code Unified Framework - Smart LLM routing with 12 providers",
   "type": "module",
   "bin": {
-    "@quantyval-ai/quantyval-ai": "bin/quantyval.js"
+    "quantyval": "bin/quantyval.js"
   },
   "main": "src/index.js",
   "scripts": {
@@ -27,7 +27,13 @@
     "test:all": "node --test tests/*.test.js",
     "example": "node examples/basic/bot.js"
   },
-  "keywords": ["ai", "agent", "llm", "multi-agent", "voice-agent"],
+  "keywords": [
+    "ai",
+    "agent",
+    "llm",
+    "multi-agent",
+    "voice-agent"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
