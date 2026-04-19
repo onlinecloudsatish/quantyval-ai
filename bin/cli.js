@@ -63,50 +63,62 @@ async function listModels() {
   log('Example: quantyval run --model openrouter:anthropic/claude-3.5-sonnet\n', 'dim');
 }
 
-// Interactive model selector
+// Interactive model selector with categories
 async function selectModel() {
-  log('\n🎯 Select Model', 'green');
-  log('='.repeat(35), 'dim');
-  
-  // Collect all models with indices
-  const allModels = [];
-  for (const p of PROVIDERS) {
-    for (const m of p.models) {
-      allModels.push({ provider: p.id, model: m });
-    }
-  }
-  
-  // Display grouped by provider
-  let idx = 1;
-  for (const p of PROVIDERS) {
-    log(`\n${p.name}:`, 'blue');
-    for (const m of p.models) {
-      log(`  ${String(idx).padStart(2)}. ${p.id}:${m}`, 'dim');
-      idx++;
-    }
-  }
-  
-  log('\n' + '='.repeat(35), 'dim');
-  log('\nEnter number (or press Enter for kilocode:kilo-auto/free): ', 'green');
-  
-  // Simple prompt using readline
   const readline = await import('readline');
+  
+  // Group by provider
+  const grouped = {};
+  for (const p of PROVIDERS) {
+    grouped[p.id] = { name: p.name, models: p.models };
+  }
+  
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   
+  // Show provider menu
+  log('\n🎯 Select Model', 'green');
+  log('='.repeat(40), 'dim');
+  
+  const providerList = Object.keys(grouped);
+  for (let i = 0; i < providerList.length; i++) {
+    const pid = providerList[i];
+    log(`  ${i + 1}. ${grouped[pid].name}`, 'blue');
+  }
+  
+  log('\n' + '-'.repeat(40), 'dim');
+  log('Select provider number: ', 'green');
+  
   return new Promise((resolve) => {
-    rl.question('> ', (answer) => {
-      rl.close();
-      const num = parseInt(answer.trim()) || 0;
-      if (num > 0 && num <= allModels.length) {
-        const selected = allModels[num - 1];
-        const modelStr = `${selected.provider}:${selected.model}`;
-        log(`\n✅ Selected: ${modelStr}\n`, 'green');
-        resolve(modelStr);
-      } else if (num === 0) {
-        log('\n✅ Selected: kilocode:kilo-auto/free (default)\n', 'green');
-        resolve('kilocode:kilo-auto/free');
+    rl.question('> ', (pnum) => {
+      const pi = parseInt(pnum) - 1;
+      if (pi >= 0 && pi < providerList.length) {
+        const pid = providerList[pi];
+        const models = grouped[pid].models;
+        
+        log(`\n📦 Models for ${grouped[pid].name}:`, 'green');
+        log('-'.repeat(40), 'dim');
+        
+        for (let i = 0; i < models.length; i++) {
+          log(`  ${i + 1}. ${models[i]}`, 'dim');
+        }
+        
+        log('\nSelect model number: ', 'green');
+        
+        rl.question('> ', (mnum) => {
+          rl.close();
+          const mi = parseInt(mnum) - 1;
+          if (mi >= 0 && mi < models.length) {
+            const modelStr = `${pid}:${models[mi]}`;
+            log(`\n✅ Selected: ${modelStr}\n`, 'green');
+            resolve(modelStr);
+          } else {
+            log('\n❌ Invalid, using default\n', 'red');
+            resolve('kilocode:kilo-auto/free');
+          }
+        });
       } else {
-        log('\n❌ Invalid selection, using default\n', 'red');
+        rl.close();
+        log('\n❌ Invalid provider, using default\n', 'red');
         resolve('kilocode:kilo-auto/free');
       }
     });
@@ -304,7 +316,13 @@ async function main() {
         break;
       case 'select':
         const selected = await selectModel();
-        console.log(`\nRun with: quantyval run --model ${selected}`);
+        if (selected) {
+          log('\n🚀 Starting chat with selected model...\n', 'green');
+          options.model = selected;
+          await runAgent(options);
+        } else {
+          log('\nCancelled.\n', 'dim');
+        }
         break;
       default:
         error(`Unknown command: ${command}`);
