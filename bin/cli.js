@@ -3,17 +3,26 @@
 // Usage: quantyval <command> [options]
 
 import { parseArgs } from 'util';
+import { createRequire } from 'module';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createInterface } from 'readline';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const srcDir = path.resolve(__dirname, 'src');
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pkgDir = path.resolve(__dirname);
 
-const { Agent } = await import(path.join(srcDir, 'core/Agent.js'));
-const { startServer, SecureServer } = await import(path.join(srcDir, 'server/SecureServer.js'));
-const { createProvider } = await import(path.join(srcDir, 'core/LLMProvider.js'));
-const { Memory } = await import(path.join(srcDir, 'memory/Memory.js'));
-const { createVoiceProvider } = await import(path.join(srcDir, 'voice/Voice.js'));
+// Import core modules using require for ESM compatibility
+const Agent = require(path.join(pkgDir, 'src/core/Agent.js'));
+const SecureServer = require(path.join(pkgDir, 'src/server/SecureServer.js'));
+const LLMProvider = require(path.join(pkgDir, 'src/core/LLMProvider.js'));
+const Memory = require(path.join(pkgDir, 'src/memory/Memory.js'));
+const Voice = require(path.join(pkgDir, 'src/voice/Voice.js'));
+
+const { createProvider } = LLMProvider;
+const { startServer } = SecureServer;
+const { createVoiceProvider } = Voice;
 
 const COMMANDS = {
   run: 'Run agent interactively',
@@ -32,30 +41,39 @@ const PROVIDERS = [
   { id: 'openrouter', name: 'OpenRouter (Free)', models: [
     'meta-llama/llama-3.3-70b-instruct:free',
     'mistralai/devstral-2512:free',
-    'nvidia/nemotron-3-super-qlora-助手-多语言模型的免费使用:free',
-    'qwen/qwen-3-next-80b:free',
-    'deepseek/deepseek-r1:free',
     'google/gemma-3-27b-instruct:free',
-    'openai/gpt-oss-120b:free',
-    'nousresearch/hermes-3-405b:free',
-    'xiaomi/mimo-v2-flash:free',
-    'stepfun-ai/step-3.5-flash:free',
-    'cognitivecomputations/dolphin-mistral-24b:free',
-    'google/gemma-3-12b-instruct:free',
-    'google/gemma-3-4b-instruct:free',
-    'meta-llama/llama-3.2-3b-instruct:free',
   ] },
   { id: 'openai', name: 'OpenAI', models: ['gpt-4o', 'gpt-4-turbo', 'o1-preview'] },
-  { id: 'anthropic', name: 'Anthropic', models: ['claude-sonnet-4-20250514', 'claude-opus-4-20250514', 'claude-haiku-4-20250514'] },
+  { id: 'anthropic', name: 'Anthropic', models: ['claude-sonnet-4', 'claude-opus-4', 'claude-haiku-4'] },
   { id: 'groq', name: 'Groq', models: ['llama-3.1-70b-versatile', 'mixtral-8x7b-32768'] },
   { id: 'ollama', name: 'Ollama (local)', models: ['llama3', 'mistral', 'codellama'] },
   { id: 'gemini', name: 'Google Gemini', models: ['gemini-2.0-flash-exp', 'gemini-pro'] },
-  { id: 'mistral', name: 'Mistral', models: ['mistral-large-latest', 'mistral-small-3.1'] },
-  { id: 'nvidia', name: 'NVIDIA', models: ['nvidia/llama-3.1-nemotron-70b-instruct'] },
+  { id: 'mistral', name: 'Mistral', models: ['mistral-large', 'mistral-small'] },
+  { id: 'nvidia', name: 'NVIDIA', models: ['nvidia/llama-3.1-nemotron-70b'] },
   { id: 'cohere', name: 'Cohere', models: ['command-r-plus', 'command-r'] },
   { id: '9router', name: '9Router', models: ['if/kimi-k2-thinking', 'deepseek/deepseek-chat'] },
 ];
 
+// Color output
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  dim: '\x1b[2m',
+  green: '\x1b[32m',
+  blue: '\x1b[34m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+};
+
+function log(msg, color = 'reset') {
+  console.log(`${colors[color]}${msg}${colors.reset}`);
+}
+
+function error(msg) {
+  console.error(`${colors.red}Error: ${msg}${colors.reset}`);
+}
+
+// List models
 async function listModels() {
   log('\n📋 Available Models', 'green');
   log('='.repeat(35), 'dim');
@@ -66,24 +84,20 @@ async function listModels() {
     }
   }
   log('\nUsage: --model provider:model', 'green');
-  log('Example: quantyval run --model openrouter:anthropic/claude-3.5-sonnet\n', 'dim');
+  log('Example: quantyval run --model openrouter:meta-llama/llama-3.3-70b-instruct:free\n', 'dim');
 }
 
-// Interactive model selector with categories
+// Interactive model selector
 async function selectModel() {
-  const readline = await import('readline');
+  log('\n🎯 Select Model', 'green');
+  log('='.repeat(40), 'dim');
   
-  // Group by provider
   const grouped = {};
   for (const p of PROVIDERS) {
     grouped[p.id] = { name: p.name, models: p.models };
   }
   
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  
-  // Show provider menu
-  log('\n🎯 Select Model', 'green');
-  log('='.repeat(40), 'dim');
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
   
   const providerList = Object.keys(grouped);
   for (let i = 0; i < providerList.length; i++) {
@@ -91,8 +105,7 @@ async function selectModel() {
     log(`  ${i + 1}. ${grouped[pid].name}`, 'blue');
   }
   
-  log('\n' + '-'.repeat(40), 'dim');
-  log('Select provider number: ', 'green');
+  log('\nSelect provider number: ', 'green');
   
   return new Promise((resolve) => {
     rl.question('> ', (pnum) => {
@@ -131,41 +144,11 @@ async function selectModel() {
   });
 }
 
-const OPTIONS = {
-  help: { type: 'boolean' },
-  model: { type: 'string' },
-  system: { type: 'string' },
-  memory: { type: 'boolean' },
-  voice: { type: 'boolean' },
-  stream: { type: 'boolean' },
-  port: { type: 'string' },
-};
-
-// Color output
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  blue: '\x1b[34m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-};
-
-function log(msg, color = 'reset') {
-  console.log(`${colors[color]}${msg}${colors.reset}`);
-}
-
-function error(msg) {
-  console.error(`${colors.red}Error: ${msg}${colors.reset}`);
-}
-
 // Interactive run mode
 async function runAgent(options) {
   log('\n🤖 Quantyval AI Runner', 'green');
   log('='.repeat(30), 'dim');
   
-  // Create LLM
   let llm = null;
   if (options.model) {
     const [provider, model] = options.model.split(':');
@@ -175,123 +158,42 @@ async function runAgent(options) {
     });
   }
   
-  // Create agent
-  const agent = new Agent({
+  const agent = new Agent.default({
     name: 'Quantyval',
-    systemPrompt: options.system || 'You are Quantyval AI, a helpful coding assistant.',
-    llm: llm ? { type: options.model?.split(':')[0] || 'kilocode', apiKey: process.env.QUANTYVAL_API_KEY, model: options.model?.split(':')[1] } : null,
-    memory: options.memory ? new Memory() : null,
-  });
-  
-  // Chat loop
-  const readline = await import('readline');
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  
-  log('\n💬 Chat mode (Ctrl+C to exit)\n', 'blue');
-  
-  rl.question('You: ', async (input) => {
-    const response = await agent.run(input);
-    console.log(`\n🤖 ${response.text}\n`);
-    rl.close();
-  });
-}
-
-// HTTP Server mode
-async function serveAgent(options) {
-  log('\n🚀 Starting Quantyval Server...', 'green');
-  
-  const agent = new Agent({
-    name: 'Quantyval',
-    systemPrompt: options.system || 'You are Quantyval AI, a helpful assistant.',
-    llm: options.model ? {
-      type: options.model?.split(':')[0] || 'kilocode',
-      apiKey: process.env.QUANTYVAL_API_KEY,
-      model: options.model?.split(':')[1],
-    } : null,
-    memory: options.memory ? new Memory() : null,
-  });
-  
-  const server = new SecureServer({
-    port: parseInt(options.port || '3000'),
-    apiKey: process.env.QUANTYVAL_API_KEY,
-  });
-  
-  server.setAgent(agent);
-  await server.start();
-}
-
-// Init new project
-async function initProject() {
-  log('\n📦 Initializing Quantyval project...', 'green');
-  
-  const fs = await import('fs');
-  
-  // Create config
-  const config = {
-    name: 'my-agent',
-    model: { provider: 'kilocode', model: 'kilo-auto/free' },
-    server: { port: 3000 },
-    memory: true,
-  };
-  
-  fs.writeFileSync('./quantyval.config.json', JSON.stringify(config, null, 2));
-  log('✅ Created quantyval.config.json', 'green');
-}
-
-// Voice mode
-async function runVoice(options) {
-  log('\n🎤 Quantyval Voice Mode', 'green');
-  
-  const agent = new Agent({
-    name: 'Quantyval',
-    llm: options.model ? {
-      type: options.model.split(':')[0],
-      apiKey: process.env.QUANTYVAL_API_KEY,
-      model: options.model.split(':')[1],
+    systemPrompt: 'You are Quantyval AI. Be helpful and provide runnable code.',
+    llm: llm ? { 
+      type: options.model?.split(':')[0] || 'kilocode', 
+      apiKey: process.env.QUANTYVAL_API_KEY, 
+      model: options.model?.split(':')[1] 
     } : null,
   });
   
-  const voice = createVoiceProvider('webspeech', {});
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
   
-  log('🎙️ Speak now (Ctrl+C to exit)', 'blue');
+  log('\nYou: ');
   
-  // Note: Browser-based voice requires Web Speech API
-  log('Voice input requires browser environment', 'yellow');
+  for await (const line of rl) {
+    if (line.trim().toLowerCase() === 'exit') break;
+    
+    try {
+      const response = await agent.run(line);
+      console.log(`\n🤖 ${response.text || response}\n\nYou: `);
+    } catch (err) {
+      error(err.message);
+      console.log('\nYou: ');
+    }
+  }
+  
+  rl.close();
+  log('\nGoodbye!\n', 'green');
 }
 
 // Main
 async function main() {
   const args = process.argv.slice(2);
-  
-  if (!args.length || args[0] === 'help') {
-    log('\n🤖 Quantyval AI CLI', 'green');
-    log('='.repeat(30), 'dim');
-    log('\nUsage:', 'bright');
-    log('  quantyval <command> [options]', 'dim');
-    log('\nCommands:', 'bright');
-    for (const [cmd, desc] of Object.entries(COMMANDS)) {
-      log(`  ${cmd.padEnd(10)} ${desc}`, 'dim');
-    }
-    log('\nOptions:', 'bright');
-    log('  --model <provider:model>  LLM to use (default: kilocode:kilo-auto/free)', 'dim');
-    log('  --system <prompt>     System prompt', 'dim');
-    log('  --memory            Enable memory', 'dim');
-    log('  --port <number>      Server port (default: 3000)', 'dim');
-    log('\nExamples:', 'bright');
-    log('  quantyval run --model openai:gpt-4', 'dim');
-    log('  quantyval serve --port 8080', 'dim');
-    log('  quantyval init', 'dim');
-    console.log('');
-    process.exit(0);
-  }
-  
-  const command = args[0];
+  const command = args[0] || 'help';
   const options = {};
   
-  // Parse options
   for (let i = 1; i < args.length; i++) {
     if (args[i].startsWith('--')) {
       const [key, value] = args[i].slice(2).split('=');
@@ -299,46 +201,40 @@ async function main() {
     }
   }
   
-  try {
-    switch (command) {
-      case 'run':
+  switch (command) {
+    case 'run':
+    case 'chat':
+      await runAgent(options);
+      break;
+    case 'models':
+      await listModels();
+      break;
+    case 'select':
+      const selected = await selectModel();
+      if (selected) {
+        log('\n🚀 Starting chat with selected model...\n', 'green');
+        options.model = selected;
         await runAgent(options);
-        break;
-      case 'serve':
-        await serveAgent(options);
-        break;
-      case 'init':
-        await initProject();
-        break;
-      case 'voice':
-        await runVoice(options);
-        break;
-      case 'chat':
-        options.mode = 'chat';
-        await runAgent(options);
-        break;
-      case 'models':
-        await listModels();
-        break;
-      case 'select':
-        const selected = await selectModel();
-        if (selected) {
-          log('\n🚀 Starting chat with selected model...\n', 'green');
-          options.model = selected;
-          await runAgent(options);
-        } else {
-          log('\nCancelled.\n', 'dim');
-        }
-        break;
-      default:
-        error(`Unknown command: ${command}`);
-        console.log('Run "quantyval help" for usage');
-        process.exit(1);
-    }
-  } catch (err) {
-    error(err.message);
-    process.exit(1);
+      }
+      break;
+    case 'help':
+    default:
+      log('\n🤖 Quantyval AI CLI', 'green');
+      log('='.repeat(30), 'dim');
+      log('\nUsage: quantyval <command> [options]', 'dim');
+      log('\nCommands:', 'bright');
+      for (const [cmd, desc] of Object.entries(COMMANDS)) {
+        log(`  ${cmd.padEnd(10)} ${desc}`, 'dim');
+      }
+      log('\nOptions:', 'bright');
+      log('  --model <p:m>  Model (provider:model)', 'dim');
+      log('  --memory       Enable memory', 'dim');
+      log('\nExamples:', 'bright');
+      log('  quantyval run --model kilocode:kilo-auto/free', 'dim');
+      log('  quantyval select', 'dim');
+      log('  quantyval models', 'dim');
+      console.log('');
   }
 }
 
-main();
+main().catch(error);
