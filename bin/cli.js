@@ -16,6 +16,7 @@ const COMMANDS = {
   chat: 'Start chat mode',
   voice: 'Start voice mode',
   models: 'List available models',
+  select: 'Select model interactively',
   help: 'Show this help',
 };
 
@@ -59,6 +60,56 @@ async function listModels() {
   }
   log('\nUsage: --model provider:model', 'green');
   log('Example: quantyval run --model openrouter:anthropic/claude-3.5-sonnet\n', 'dim');
+}
+
+// Interactive model selector
+async function selectModel() {
+  log('\n🎯 Select Model', 'green');
+  log('='.repeat(35), 'dim');
+  
+  // Collect all models with indices
+  const allModels = [];
+  for (const p of PROVIDERS) {
+    for (const m of p.models) {
+      allModels.push({ provider: p.id, model: m });
+    }
+  }
+  
+  // Display grouped by provider
+  let idx = 1;
+  for (const p of PROVIDERS) {
+    log(`\n${p.name}:`, 'blue');
+    for (const m of p.models) {
+      log(`  ${String(idx).padStart(2)}. ${p.id}:${m}`, 'dim');
+      idx++;
+    }
+  }
+  
+  log('\n' + '='.repeat(35), 'dim');
+  log('\nEnter number (or press Enter for kilocode:kilo-auto/free): ', 'green');
+  
+  // Simple prompt using readline
+  const readline = await import('readline');
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  
+  return new Promise((resolve) => {
+    rl.question('> ', (answer) => {
+      rl.close();
+      const num = parseInt(answer.trim()) || 0;
+      if (num > 0 && num <= allModels.length) {
+        const selected = allModels[num - 1];
+        const modelStr = `${selected.provider}:${selected.model}`;
+        log(`\n✅ Selected: ${modelStr}\n`, 'green');
+        resolve(modelStr);
+      } else if (num === 0) {
+        log('\n✅ Selected: kilocode:kilo-auto/free (default)\n', 'green');
+        resolve('kilocode:kilo-auto/free');
+      } else {
+        log('\n❌ Invalid selection, using default\n', 'red');
+        resolve('kilocode:kilo-auto/free');
+      }
+    });
+  });
 }
 
 const OPTIONS = {
@@ -249,6 +300,10 @@ async function main() {
         break;
       case 'models':
         await listModels();
+        break;
+      case 'select':
+        const selected = await selectModel();
+        console.log(`\nRun with: quantyval run --model ${selected}`);
         break;
       default:
         error(`Unknown command: ${command}`);
