@@ -8,6 +8,7 @@
  *   quantyval agent <task>           - Run agent task
  *   quantyval vyasa <command>         - Run vyasa-u-code commands
  *   quantyval providers              - List LLM providers
+ *   quantyval select                - Interactive model selection
  *   quantyval status                 - Show status
  */
 
@@ -56,6 +57,17 @@ async function main() {
       
     case 'providers':
       listProviders();
+      break;
+      
+    case 'select':
+    case 'models':
+      // Delegate to cli.js for interactive selection
+      const { spawn } = await import('child_process');
+      const cli = spawn('node', ['bin/cli.js', command], { 
+        cwd: '/root/.openclaw/workspace/quantyval-ai',
+        stdio: 'inherit' 
+      });
+      cli.on('exit', (code) => process.exit(code || 0));
       break;
       
     case 'status':
