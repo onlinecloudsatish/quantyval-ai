@@ -120,8 +120,8 @@ async function main() {
   
   switch (command) {
     case 'run':
-      const model = args.find(a => a.startsWith('--model='))?.split('=')[1] || args[1] || 'kilocode:kilo-auto/free';
-      const [provider, modelName] = model.split(':');
+      const modelArg = args.find(a => a.startsWith('--model='))?.split('=')[1] || args[1] || 'kilocode:kilo-auto/free';
+      const [provider, modelName] = modelArg.split(':');
       
       const apiKey = process.env.QUANTYVAL_API_KEY || process.env.OPENROUTER_API_KEY;
       
@@ -132,17 +132,59 @@ async function main() {
         break;
       }
       
-      log('\n🤖 Starting chat with ' + provider + ':' + modelName, 'green');
+      log('\n🤖 Chatting with ' + provider + ':' + modelName, 'green');
       log('Type "exit" to quit\n', 'dim');
       
       const rl = createInterface({ input: process.stdin, output: process.stdout });
+      const https = require('https');
+      
+      // Chat loop
+      let messages = [];
       
       log('\nYou: ');
-      for await (const line of rl) {
-        if (line.trim().toLowerCase() === 'exit') break;
+      for await (const input of rl) {
+        if (input.trim().toLowerCase() === 'exit') break;
         
-        // Simple echo for now - actual LLM integration needs Agent.js working
-        log('\n[Demo] You said: ' + line, 'dim');
+        messages.push({ role: 'user', content: input });
+        
+        const body = JSON.stringify({
+          model: modelArg,
+          messages: messages.slice(-10), // Last 10 messages
+        });
+        
+        const options = {
+          hostname: 'openrouter.ai',
+          path: '/api/v1/chat/completions',
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://quantyval.ai',
+            'X-Title': 'Quantyval',
+          }
+        };
+        
+        try {
+          const response = await new Promise((resolve, reject) => {
+            const req = https.request(options, (res) => {
+              let data = '';
+              res.on('data', chunk => data += chunk);
+              res.on('end', () => resolve(data));
+            });
+            req.on('error', reject);
+            req.write(body);
+            req.end();
+          });
+          
+          const result = JSON.parse(response);
+          const reply = result.choices?.[0]?.message?.content || 'No response';
+          
+          messages.push({ role: 'assistant', content: reply });
+          log('\n🤖 ' + reply, 'dim');
+        } catch (e) {
+          log('\n❌ Error: ' + e.message, 'red');
+        }
+        
         log('\nYou: ');
       }
       
