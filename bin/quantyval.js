@@ -133,8 +133,9 @@ async function main() {
     case 'models':
       // Delegate to cli.js for interactive selection
       const { spawn } = await import('child_process');
-      const cli = spawn('node', ['bin/cli.js', command], { 
-        cwd: '/root/.openclaw/workspace/quantyval-ai',
+      const cliPath = require.resolve('quantyval-ai/bin/cli.js');
+      const cli = spawn('node', [cliPath, command], { 
+        cwd: process.cwd(),
         stdio: 'inherit' 
       });
       cli.on('exit', (code) => process.exit(code || 0));
