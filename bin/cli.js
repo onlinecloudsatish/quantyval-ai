@@ -10,13 +10,22 @@ const success = m => log(C.g + m + C.z);
 
 const PROVIDERS = [
   { id: 'kilocode', name: 'KiloCode', models: ['kilo-auto/free', 'kilo-pro/free'] },
-  { id: 'openrouter', name: 'OpenRouter', models: ['meta-llama/llama-3.3-70b-instruct:free', 'mistralai/devstral-2512:free'] },
-  { id: 'openai', name: 'OpenAI', models: ['gpt-4o', 'gpt-4-turbo'] },
-  { id: 'anthropic', name: 'Anthropic', models: ['claude-sonnet-4', 'claude-opus-4'] },
-  { id: 'groq', name: 'Groq', models: ['llama-3.1-70b-versatile'] },
-  { id: 'gemini', name: 'Google Gemini', models: ['gemini-2.0-flash'] },
-  { id: 'mistral', name: 'Mistral', models: ['mistral-large', 'mistral-small'] },
-  { id: '9router', name: '9Router', models: ['if/kimi-k2-thinking'] },
+  { id: 'openrouter', name: 'OpenRouter (Free)', models: [
+    'meta-llama/llama-3.3-70b-instruct:free',  // Best overall
+    'mistralai/devstral-2512:free', // Best for coding
+    'nvidia/nemotron-3-super-qlora-助手-多语言模型的免费使用:free', // 262K context
+    'qwen/qwen-3-next-80b:free', // Agents/RAG
+    'deepseek/deepseek-r1:free', // Reasoning
+    'google/gemma-3-27b-instruct:free', // Multimodal
+    'openai/gpt-oss-120b:free', // Tool use
+    'xiaomi/mimo-v2-flash:free', // Coding
+  ] },
+  { id: 'openai', name: 'OpenAI', models: ['gpt-4o', 'gpt-4-turbo', 'o1-preview'] },
+  { id: 'anthropic', name: 'Anthropic', models: ['claude-sonnet-4-20250514', 'claude-opus-4-20250514'] },
+  { id: 'groq', name: 'Groq', models: ['llama-3.1-70b-versatile', 'mixtral-8x7b-32768'] },
+  { id: 'gemini', name: 'Google Gemini', models: ['gemini-2.0-flash-exp', 'gemini-pro'] },
+  { id: 'mistral', name: 'Mistral', models: ['mistral-large-latest', 'mistral-small-3.1'] },
+  { id: '9router', name: '9Router', models: ['if/kimi-k2-thinking', 'deepseek/deepseek-chat'] },
 ];
 
 function showHelp() {
