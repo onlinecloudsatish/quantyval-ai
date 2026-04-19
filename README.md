@@ -2,8 +2,8 @@
 
 > Universal AI Agent Framework - Task execution, voice, multi-agent orchestration
 
-[![npm](https://img.shields.io/npm/v/@@quantyval-ai/quantyval-ai/@quantyval-ai/quantyval-ai)](https://npmjs.com/package/@@quantyval-ai/quantyval-ai/@quantyval-ai/quantyval-ai)
-[![GitHub](https://img.shields.io/github/license/onlinecloudsatish/@quantyval-ai/quantyval-ai)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@quantyval-ai/quantyval-ai)](https://npmjs.com/package/@quantyval-ai/quantyval-ai)
+[![GitHub](https://img.shields.io/github/license/onlinecloudsatish/quantyval-ai)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-37%20passing-green)](tests/)
 
 ## Features
@@ -19,6 +19,12 @@
 | **Tools** | Playwright browser automation |
 | **Multi-Agent** | Sequential, parallel, hierarchical orchestration |
 | **Voice** | TTS (ElevenLabs, OpenAI) + STT (Whisper) |
+
+## Installation
+
+```bash
+npm install @quantyval-ai/quantyval-ai
+```
 
 ## Quick Start
 
@@ -38,7 +44,7 @@ npx quantyval init
 ### Code
 
 ```javascript
-import { Agent, createProvider } from '@quantyval-ai/quantyval-ai';
+import { Agent } from '@quantyval-ai/quantyval-ai';
 
 const agent = new Agent({
   name: 'MyBot',
@@ -54,12 +60,6 @@ console.log(response.text);
 
 ```bash
 TELEGRAM_BOT_TOKEN=xxx node examples/telegram-bot/bot.js
-```
-
-## Installation
-
-```bash
-npm install @quantyval-ai/quantyval-ai
 ```
 
 ## Configuration
@@ -83,7 +83,7 @@ quantyval voice                          # Voice mode
 ## Architecture
 
 ```
-@quantyval-ai/quantyval-ai/
+quantyval-ai/
 ├── bin/cli.js          # CLI entry point
 ├── src/
 │   ├── core/           # Agent, LLM providers
@@ -97,13 +97,6 @@ quantyval voice                          # Voice mode
 ├── examples/          # Example projects
 └── tests/             # 37 tests
 ```
-
-## Best Practices
-
-- Set `QUANTYVAL_API_KEY` environment variable
-- Use `.env` for configuration
-- Enable memory for conversations
-- Use skills for tech-specific prompts
 
 ## License
 
